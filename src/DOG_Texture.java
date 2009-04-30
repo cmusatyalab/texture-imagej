@@ -1,5 +1,6 @@
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
@@ -28,8 +29,20 @@ public class DOG_Texture implements PlugInFilter {
         // resize
         ImageProcessor subip = ip.crop().resize(SIZE);
 
-        double features[] = TextureTools
-                .generateLaplacianPyramidFeatures(subip);
+        if (false) {
+            IntegralImage ii = new IntegralImage((ByteProcessor) subip);
+            System.out.println(ii.getSum());
+            System.out.println(ii.getSum(0, 0, 1, 1));
+            System.out.println(ii.getSum(0, 1, 1, 1));
+            System.out.println(ii.getSum(1, 0, 1, 1));
+            System.out.println(ii.getSum(1, 1, 1, 1));
+            new ImagePlus("integral", ii.toImageProcessor()).show();
+        }
+
+        IntegralImage imgs[] = TextureTools
+                .generateLaplacianIntegralPyramid(subip);
+
+        double features[] = TextureTools.generateFeatures(imgs);
 
         System.out.println(Arrays.toString(features));
     }
