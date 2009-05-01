@@ -1,3 +1,4 @@
+import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
@@ -6,7 +7,7 @@ import ij.process.ImageProcessor;
 import java.awt.Rectangle;
 import java.util.Arrays;
 
-public class DOG_Texture implements PlugInFilter {
+public class Generate_DOG_Texture implements PlugInFilter {
 
     final static private int SIZE = 32;
 
@@ -44,7 +45,7 @@ public class DOG_Texture implements PlugInFilter {
 
         double features[] = TextureTools.generateFeatures(imgs);
 
-        System.out.println(Arrays.toString(features));
+        IJ.write("texture=" + Arrays.toString(features));
     }
 
     @Override
