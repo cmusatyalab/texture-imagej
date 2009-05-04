@@ -42,6 +42,8 @@ public class IntegralImage {
     }
 
     public double getAverage(int x, int y, int width, int height) {
+        // System.out.println("getAverage: " + x + "," + y + "," + width + ","
+        // + height);
         return (double) getSum(x, y, width, height) / (double) (width * height);
     }
 

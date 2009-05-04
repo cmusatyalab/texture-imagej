@@ -3,6 +3,8 @@ import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
+import java.util.List;
+
 public class TextureTools {
     private TextureTools() {
     }
@@ -52,10 +54,22 @@ public class TextureTools {
     }
 
     static double[] generateFeatures(IntegralImage imgs[]) {
+        IntegralImage ii = imgs[imgs.length - 1];
+        return generateFeatures(imgs, 0, 0, ii.getWidth(), ii.getHeight());
+    }
+
+    static double[] generateFeatures(IntegralImage imgs[], int x, int y, int w,
+            int h) {
         double result[] = new double[imgs.length];
 
         for (int i = 0; i < result.length; i++) {
-            result[i] = imgs[i].getAverage();
+            int scale = (result.length - 1) - i;
+            int xx = x >> scale;
+            int yy = y >> scale;
+            int ww = w >> scale;
+            int hh = h >> scale;
+
+            result[i] = imgs[i].getAverage(xx, yy, ww, hh);
         }
 
         return result;
@@ -66,5 +80,18 @@ public class TextureTools {
         blurred.convolve(GAUSSIAN_5X5, 5, 5);
         blurred.setInterpolationMethod(ImageProcessor.NEAREST_NEIGHBOR);
         return blurred.resize(blurred.getWidth() / 2);
+    }
+
+    static void findPairwiseMatches(IntegralImage[] imgs,
+            List<double[]> features, ImageProcessor output, int boxSize,
+            int step) {
+        int w = output.getWidth();
+        int h = output.getHeight();
+
+        for (int y = 0; y < h - boxSize; y++) {
+            for (int x = 0; x < w - boxSize; x++) {
+                double ff[] = generateFeatures(imgs, x, y, boxSize, boxSize);
+            }
+        }
     }
 }
