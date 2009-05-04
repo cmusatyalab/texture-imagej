@@ -84,13 +84,37 @@ public class TextureTools {
 
     static void findPairwiseMatches(IntegralImage[] imgs,
             List<double[]> features, ImageProcessor output, int boxSize,
-            int step) {
+            int step, double distanceThreshold) {
         int w = output.getWidth();
         int h = output.getHeight();
 
         for (int y = 0; y < h - boxSize; y++) {
             for (int x = 0; x < w - boxSize; x++) {
+                double minDistance = Double.MAX_VALUE;
                 double ff[] = generateFeatures(imgs, x, y, boxSize, boxSize);
+                for (double[] feature : features) {
+                    double distance = 0.0;
+                    for (int i = 0; i < feature.length; i++) {
+                        if (ff[i] > feature[i]) {
+                            distance += Math.abs(ff[i] - feature[i]) / ff[i];
+                        } else {
+                            distance += Math.abs(ff[i] - feature[i])
+                                    / feature[i];
+                        }
+                    }
+                    distance /= feature.length;
+                    // System.out.println(Arrays.toString(ff));
+                    // System.out.println(" " + Arrays.toString(feature));
+                    // System.out.println(" " + distance);
+                    minDistance = Math.min(distance, minDistance);
+                }
+
+                // System.out.println("minDistance: " + minDistance);
+                if (minDistance <= distanceThreshold) {
+                    // System.out.println("filling " + x + "," + y);
+                    output.setRoi(x, y, boxSize, boxSize);
+                    output.fill();
+                }
             }
         }
     }
