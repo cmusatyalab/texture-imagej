@@ -3,11 +3,14 @@ import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
+import java.awt.Color;
 import java.util.List;
 
 public class TextureTools {
     private TextureTools() {
     }
+
+    final static int BOX_SIZE = 32;
 
     final static private int NUM_LAP_PYR_LEVELS = 4;
 
@@ -110,7 +113,12 @@ public class TextureTools {
                 }
 
                 // System.out.println("minDistance: " + minDistance);
-                if (minDistance <= distanceThreshold) {
+                if (false) {
+                    output.setRoi(x, y, boxSize, boxSize);
+                    float v = (float) minDistance;
+                    output.setColor(new Color(v, v, v));
+                    output.fill();
+                } else if (minDistance <= distanceThreshold) {
                     // System.out.println("filling " + x + "," + y);
                     output.setRoi(x, y, boxSize, boxSize);
                     output.fill();

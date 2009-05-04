@@ -14,8 +14,6 @@ public class Find_DOG_Texture implements PlugInFilter {
 
     private List<double[]> features;
 
-    static final private int BOX_SIZE = 32;
-
     static final private int STEP = 8;
 
     static private String lastFeatureString = "";
@@ -33,8 +31,8 @@ public class Find_DOG_Texture implements PlugInFilter {
         output.setColor(Color.BLACK);
 
         // do it
-        TextureTools.findPairwiseMatches(imgs, features, output, BOX_SIZE,
-                STEP, 0.02);
+        TextureTools.findPairwiseMatches(imgs, features, output,
+                TextureTools.BOX_SIZE, STEP, 0.02);
 
         // display
         new ImagePlus("Result of DOG search", output).show();

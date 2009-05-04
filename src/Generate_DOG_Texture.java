@@ -5,13 +5,12 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
-import java.util.Arrays;
 
 public class Generate_DOG_Texture implements PlugInFilter {
 
-    final static private int SIZE = 32;
-
     private ImagePlus imp;
+
+    static final private int SIZE = 32;
 
     @Override
     public void run(ImageProcessor ip) {
@@ -28,7 +27,7 @@ public class Generate_DOG_Texture implements PlugInFilter {
         imp.setRoi(r);
 
         // resize
-        ImageProcessor subip = ip.crop().resize(SIZE);
+        ImageProcessor subip = ip.crop().resize(TextureTools.BOX_SIZE);
 
         if (false) {
             IntegralImage ii = new IntegralImage((ByteProcessor) subip);
@@ -45,7 +44,13 @@ public class Generate_DOG_Texture implements PlugInFilter {
 
         double features[] = TextureTools.generateFeatures(imgs);
 
-        IJ.write("texture=" + Arrays.toString(features));
+        StringBuilder sb = new StringBuilder();
+        for (double d : features) {
+            sb.append(d);
+            sb.append(",");
+        }
+
+        IJ.write(sb.substring(0, sb.length() - 1));
     }
 
     @Override
