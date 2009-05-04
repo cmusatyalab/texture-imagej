@@ -14,8 +14,6 @@ public class Find_DOG_Texture implements PlugInFilter {
 
     private List<double[]> features;
 
-    static final private int STEP = 8;
-
     static private String lastFeatureString = "";
 
     @Override
@@ -32,7 +30,7 @@ public class Find_DOG_Texture implements PlugInFilter {
 
         // do it
         TextureTools.findPairwiseMatches(imgs, features, output,
-                TextureTools.BOX_SIZE, STEP, 0.02);
+                TextureTools.BOX_SIZE, 0.07);
 
         // display
         new ImagePlus("Result of DOG search", output).show();
@@ -48,16 +46,19 @@ public class Find_DOG_Texture implements PlugInFilter {
 
         if (arg.isEmpty()) {
             arg = IJ.getString("Enter features", lastFeatureString);
+            if (arg.isEmpty()) {
+                return DONE;
+            }
             lastFeatureString = arg;
         }
         String args[] = arg.split("\\s+");
         for (String a : args) {
             String nums[] = a.split(",");
-            if (nums.length != 4) {
+            if (nums.length != 4 * 3) {
                 throw new IllegalArgumentException("Bad size of feature vector");
             }
 
-            double feature[] = new double[4];
+            double feature[] = new double[12];
             int i = 0;
             for (String n : nums) {
                 feature[i++] = Double.parseDouble(n);
@@ -68,7 +69,7 @@ public class Find_DOG_Texture implements PlugInFilter {
 
         this.features = features;
 
-        return DOES_8G;
+        return DOES_RGB;
     }
 
 }

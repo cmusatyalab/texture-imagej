@@ -20,7 +20,7 @@ public class TextureTools {
     static IntegralImage[] generateLaplacianIntegralPyramid(ImageProcessor img) {
         ImageProcessor[] gaussianIm = new ImageProcessor[NUM_LAP_PYR_LEVELS + 1];
         ImageProcessor[] laplacianIm = new ImageProcessor[NUM_LAP_PYR_LEVELS + 1];
-        IntegralImage[] result = new IntegralImage[NUM_LAP_PYR_LEVELS];
+        IntegralImage[] result = new IntegralImage[NUM_LAP_PYR_LEVELS * 3];
 
         // make gaussian pyramid
         gaussianIm[NUM_LAP_PYR_LEVELS] = img;
@@ -42,7 +42,18 @@ public class TextureTools {
 
         // make integral images
         for (int i = 1; i <= NUM_LAP_PYR_LEVELS; i++) {
-            result[i - 1] = new IntegralImage((ByteProcessor) laplacianIm[i]);
+            int ii = (i - 1) * 3;
+
+            ByteProcessor rr = (ByteProcessor) laplacianIm[i].toFloat(0, null)
+                    .convertToByte(true);
+            ByteProcessor gg = (ByteProcessor) laplacianIm[i].toFloat(1, null)
+                    .convertToByte(true);
+            ByteProcessor bb = (ByteProcessor) laplacianIm[i].toFloat(2, null)
+                    .convertToByte(true);
+
+            result[ii] = new IntegralImage(rr);
+            result[ii + 1] = new IntegralImage(gg);
+            result[ii + 2] = new IntegralImage(bb);
         }
 
         // display ?
@@ -66,7 +77,7 @@ public class TextureTools {
         double result[] = new double[imgs.length];
 
         for (int i = 0; i < result.length; i++) {
-            int scale = (result.length - 1) - i;
+            int scale = ((result.length - 1) - i) / 3;
             int xx = x >> scale;
             int yy = y >> scale;
             int ww = w >> scale;
@@ -87,7 +98,7 @@ public class TextureTools {
 
     static void findPairwiseMatches(IntegralImage[] imgs,
             List<double[]> features, ImageProcessor output, int boxSize,
-            int step, double distanceThreshold) {
+            double distanceThreshold) {
         int w = output.getWidth();
         int h = output.getHeight();
 
