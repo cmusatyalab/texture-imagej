@@ -72,4 +72,10 @@ public class IntegralImage {
     public int getHeight() {
         return h - 1;
     }
+
+    @Override
+    public String toString() {
+        return "integral image: " + getWidth() + "x" + getHeight() + ", sum: "
+                + getSum();
+    }
 }
