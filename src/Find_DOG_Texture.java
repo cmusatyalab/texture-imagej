@@ -43,15 +43,14 @@ public class Find_DOG_Texture implements PlugInFilter {
         // read parameters
         // split on space
         List<double[]> features = new ArrayList<double[]>();
-
         if (arg.isEmpty()) {
-            arg = IJ.getString("Enter features", lastFeatureString);
+            arg = IJ.getString("features", lastFeatureString);
             if (arg.isEmpty()) {
                 return DONE;
             }
             lastFeatureString = arg;
         }
-        String args[] = arg.split("\\s+");
+        String args[] = arg.split(";");
         for (String a : args) {
             String nums[] = a.split(",");
             if (nums.length != 4 * 3) {
