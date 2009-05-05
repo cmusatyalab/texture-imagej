@@ -30,6 +30,10 @@ public class TextureTools {
             gaussianIm[gindex] = createOnePyramidStepDown(gaussianIm[gindex + 1]);
         }
 
+        // for (ImageProcessor imageProcessor : gaussianIm) {
+        // System.out.println("gauss: " + imageProcessor);
+        // }
+
         // make laplacian pyramid
         laplacianIm[0] = gaussianIm[0];
         for (int i = 1; i <= NUM_LAP_PYR_LEVELS; i++) {
@@ -39,6 +43,10 @@ public class TextureTools {
                     .resize(gaussianIm[i].getWidth());
             laplacianIm[i].copyBits(gaussianIm[i], 0, 0, Blitter.DIFFERENCE);
         }
+
+        // for (ImageProcessor imageProcessor : laplacianIm) {
+        // System.out.println("laplace: " + imageProcessor);
+        // }
 
         // make integral images
         for (int i = 1; i <= NUM_LAP_PYR_LEVELS; i++) {
@@ -57,6 +65,14 @@ public class TextureTools {
         }
 
         // display ?
+        if (false) {
+            for (int i = 0; i < gaussianIm.length; i++) {
+                new ImagePlus("gaussian " + i, gaussianIm[i]).show();
+            }
+            for (int i = 0; i < laplacianIm.length; i++) {
+                new ImagePlus("laplacian " + i, laplacianIm[i]).show();
+            }
+        }
         if (false) {
             for (int i = 0; i < result.length; i++) {
                 new ImagePlus("integral " + i, result[i].toImageProcessor())
@@ -83,6 +99,10 @@ public class TextureTools {
             int ww = w >> scale;
             int hh = h >> scale;
 
+            // System.out.println("(" + x + "," + y + "), (" + w + "x" + h +
+            // ")");
+            // System.out.println(" scale: " + scale + ", (" + xx + "," + yy
+            // + "), (" + ww + "x" + hh + ")");
             result[i] = imgs[i].getAverage(xx, yy, ww, hh);
         }
 

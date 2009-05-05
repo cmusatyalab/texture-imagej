@@ -18,9 +18,15 @@ public class Find_DOG_Texture implements PlugInFilter {
 
     @Override
     public void run(ImageProcessor ip) {
+        // System.out.println(ip);
+
         // generate integral pyramid for the entire image
         IntegralImage imgs[] = TextureTools
                 .generateLaplacianIntegralPyramid(ip);
+
+        // for (IntegralImage ii : imgs) {
+        // System.out.println(ii);
+        // }
 
         // create output image
         ImageProcessor output = new ByteProcessor(ip.getWidth(), ip.getHeight());
