@@ -70,5 +70,4 @@ public class Find_DOG_Texture implements PlugInFilter {
 
         return DOES_RGB;
     }
-
 }
