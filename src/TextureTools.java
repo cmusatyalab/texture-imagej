@@ -39,8 +39,8 @@ public class TextureTools {
         for (int i = 1; i <= NUM_LAP_PYR_LEVELS; i++) {
             laplacianIm[i - 1]
                     .setInterpolationMethod(ImageProcessor.NEAREST_NEIGHBOR);
-            laplacianIm[i] = laplacianIm[i - 1]
-                    .resize(gaussianIm[i].getWidth());
+            laplacianIm[i] = laplacianIm[i - 1].resize(
+                    gaussianIm[i].getWidth(), gaussianIm[i].getHeight());
             laplacianIm[i].copyBits(gaussianIm[i], 0, 0, Blitter.DIFFERENCE);
         }
 
