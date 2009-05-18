@@ -32,21 +32,21 @@ public class TextureTools {
 
     final static int BOX_SIZE = 32;
 
-    final static private int NUM_LAP_PYR_LEVELS = 4;
+    final static private int PYRAMID_LEVELS = 4;
 
     final static private float[] GAUSSIAN_5X5 = { 2, 4, 5, 4, 2, 4, 9, 12, 9,
             4, 5, 12, 15, 12, 5, 4, 9, 12, 9, 4, 2, 4, 5, 4, 2 };
 
     static IntegralImage[] generateLaplacianIntegralPyramid(ImageProcessor img) {
-        ImageProcessor[] gaussianIm = new ImageProcessor[NUM_LAP_PYR_LEVELS + 1];
-        ImageProcessor[] laplacianIm = new ImageProcessor[NUM_LAP_PYR_LEVELS + 1];
-        IntegralImage[] result = new IntegralImage[NUM_LAP_PYR_LEVELS * 3];
+        ImageProcessor[] gaussianIm = new ImageProcessor[PYRAMID_LEVELS + 1];
+        ImageProcessor[] laplacianIm = new ImageProcessor[PYRAMID_LEVELS + 1];
+        IntegralImage[] result = new IntegralImage[PYRAMID_LEVELS * 3];
 
         // make gaussian pyramid
-        gaussianIm[NUM_LAP_PYR_LEVELS] = img;
+        gaussianIm[PYRAMID_LEVELS] = img;
 
-        for (int i = 1; i <= NUM_LAP_PYR_LEVELS; i++) {
-            int gindex = NUM_LAP_PYR_LEVELS - i;
+        for (int i = 1; i <= PYRAMID_LEVELS; i++) {
+            int gindex = PYRAMID_LEVELS - i;
             gaussianIm[gindex] = createOnePyramidStepDown(gaussianIm[gindex + 1]);
         }
 
@@ -56,7 +56,7 @@ public class TextureTools {
 
         // make laplacian pyramid
         laplacianIm[0] = gaussianIm[0];
-        for (int i = 1; i <= NUM_LAP_PYR_LEVELS; i++) {
+        for (int i = 1; i <= PYRAMID_LEVELS; i++) {
             laplacianIm[i - 1]
                     .setInterpolationMethod(ImageProcessor.NEAREST_NEIGHBOR);
             laplacianIm[i] = gaussianIm[i - 1].resize(gaussianIm[i].getWidth(),
@@ -69,7 +69,7 @@ public class TextureTools {
         // }
 
         // make integral images
-        for (int i = 1; i <= NUM_LAP_PYR_LEVELS; i++) {
+        for (int i = 1; i <= PYRAMID_LEVELS; i++) {
             int ii = (i - 1) * 3;
 
             ByteProcessor rr = (ByteProcessor) laplacianIm[i].toFloat(0, null)
