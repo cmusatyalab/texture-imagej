@@ -27,6 +27,10 @@ import java.awt.Color;
 import java.util.List;
 
 public class TextureTools {
+    private enum TextureMethod {
+        CORRECT, SNAPFIND
+    }
+
     private TextureTools() {
     }
 
@@ -38,6 +42,11 @@ public class TextureTools {
             4, 5, 12, 15, 12, 5, 4, 9, 12, 9, 4, 2, 4, 5, 4, 2 };
 
     static IntegralImage[] generateLaplacianIntegralPyramid(ImageProcessor img) {
+        return generateLaplacianIntegralPyramid(img, TextureMethod.CORRECT);
+    }
+
+    static IntegralImage[] generateLaplacianIntegralPyramid(ImageProcessor img,
+            TextureMethod method) {
         ImageProcessor[] gaussianIm = new ImageProcessor[PYRAMID_LEVELS + 1];
         ImageProcessor[] laplacianIm = new ImageProcessor[PYRAMID_LEVELS + 1];
         IntegralImage[] result = new IntegralImage[PYRAMID_LEVELS * 3];
@@ -58,8 +67,16 @@ public class TextureTools {
         for (int i = 1; i <= PYRAMID_LEVELS; i++) {
             laplacianIm[i - 1]
                     .setInterpolationMethod(ImageProcessor.NEAREST_NEIGHBOR);
-            laplacianIm[i] = gaussianIm[i - 1].resize(gaussianIm[i].getWidth(),
-                    gaussianIm[i].getHeight());
+            switch (method) {
+            case SNAPFIND:
+                laplacianIm[i] = laplacianIm[i - 1].resize(gaussianIm[i]
+                        .getWidth(), gaussianIm[i].getHeight());
+                break;
+            case CORRECT:
+                laplacianIm[i] = gaussianIm[i - 1].resize(gaussianIm[i]
+                        .getWidth(), gaussianIm[i].getHeight());
+                break;
+            }
             laplacianIm[i].copyBits(gaussianIm[i], 0, 0, Blitter.DIFFERENCE);
         }
 
