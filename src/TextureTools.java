@@ -45,9 +45,8 @@ public class TextureTools {
         // make gaussian pyramid
         gaussianIm[PYRAMID_LEVELS] = img;
 
-        for (int i = 1; i <= PYRAMID_LEVELS; i++) {
-            int gindex = PYRAMID_LEVELS - i;
-            gaussianIm[gindex] = createOnePyramidStepDown(gaussianIm[gindex + 1]);
+        for (int i = PYRAMID_LEVELS - 1; i >= 0; i--) {
+            gaussianIm[i] = createOnePyramidStepDown(gaussianIm[i + 1]);
         }
 
         // for (ImageProcessor imageProcessor : gaussianIm) {
