@@ -30,6 +30,8 @@ import java.util.List;
 
 public class Find_DOG_Texture implements PlugInFilter {
 
+    private static final int MIN_SIZE = 16;
+
     private ImagePlus imp;
 
     private List<double[]> features;
@@ -55,8 +57,7 @@ public class Find_DOG_Texture implements PlugInFilter {
         output.setColor(Color.BLACK);
 
         // do it
-        TextureTools.findPairwiseMatches(imgs, features, output,
-                TextureTools.BOX_SIZE, 0.07);
+        TextureTools.findPairwiseMatches(imgs, features, output, 0.07);
 
         // display
         new ImagePlus("Result of DOG search", output).show();
@@ -79,17 +80,35 @@ public class Find_DOG_Texture implements PlugInFilter {
         String args[] = arg.split(";");
         for (String a : args) {
             String nums[] = a.split(",");
-            if (nums.length != 4 * 3) {
-                throw new IllegalArgumentException("Bad size of feature vector");
+
+            // size is first number
+            int size = Integer.parseInt(nums[0]);
+            if ((size < MIN_SIZE) || (!TextureTools.isPowerOfTwo(size))) {
+                IJ.error("Bad feature vector");
+                return DONE;
             }
 
-            double feature[] = new double[12];
-            int i = 0;
-            for (String n : nums) {
-                feature[i++] = Double.parseDouble(n);
+            // lg(n) - 1, isPowerOfTwo(n)
+            int expectedLength = (Integer.numberOfTrailingZeros(size) - 1) * 3;
+            System.out.println(expectedLength);
+
+            if ((nums.length - 1) != expectedLength) {
+                IJ.error("Bad size of feature vector");
+                return DONE;
             }
 
+            double feature[] = new double[expectedLength];
+            for (int i = 0; i < expectedLength; i++) {
+                feature[i] = Double.parseDouble(nums[i + 1]);
+            }
+
+            // System.out.println(Arrays.toString(feature));
             features.add(feature);
+        }
+
+        if (imp.getWidth() < MIN_SIZE || imp.getHeight() < MIN_SIZE) {
+            IJ.error("Image must be at least " + MIN_SIZE + "x" + MIN_SIZE);
+            return DONE;
         }
 
         this.features = features;

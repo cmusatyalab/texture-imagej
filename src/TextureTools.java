@@ -30,32 +30,36 @@ public class TextureTools {
     private TextureTools() {
     }
 
-    final static int BOX_SIZE = 32;
-
-    final static private int PYRAMID_LEVELS = 4;
-
     final static private float[] GAUSSIAN_5X5 = { 2, 4, 5, 4, 2, 4, 9, 12, 9,
             4, 5, 12, 15, 12, 5, 4, 9, 12, 9, 4, 2, 4, 5, 4, 2 };
 
     static IntegralImage[] generateLaplacianIntegralPyramid(ImageProcessor img) {
-        ImageProcessor[] gaussianIm = new ImageProcessor[PYRAMID_LEVELS + 1];
-        ImageProcessor[] laplacianIm = new ImageProcessor[PYRAMID_LEVELS + 1];
-        IntegralImage[] result = new IntegralImage[PYRAMID_LEVELS * 3];
+        int minDimension = Math.min(img.getWidth(), img.getHeight());
+        // floor(lg(w)) - 1
+        int pyramidLevels = 30 - Integer.numberOfLeadingZeros(minDimension);
+
+        System.out.println("pyramid levels: " + pyramidLevels);
+
+        ImageProcessor[] gaussianIm = new ImageProcessor[pyramidLevels + 1];
+        ImageProcessor[] laplacianIm = new ImageProcessor[pyramidLevels + 1];
+        IntegralImage[] result = new IntegralImage[pyramidLevels * 3];
 
         // make gaussian pyramid
-        gaussianIm[PYRAMID_LEVELS] = img;
+        gaussianIm[pyramidLevels] = img;
 
-        for (int i = PYRAMID_LEVELS - 1; i >= 0; i--) {
+        for (int i = pyramidLevels - 1; i >= 0; i--) {
             gaussianIm[i] = createOnePyramidStepDown(gaussianIm[i + 1]);
         }
 
-        // for (ImageProcessor imageProcessor : gaussianIm) {
-        // System.out.println("gauss: " + imageProcessor);
-        // }
+        for (ImageProcessor imageProcessor : gaussianIm) {
+            System.out.println("gauss: " + imageProcessor);
+        }
 
         // make laplacian pyramid
         laplacianIm[0] = gaussianIm[0];
-        for (int i = 1; i <= PYRAMID_LEVELS; i++) {
+        // System.out
+        // .println("laplacianIm[0] width: " + laplacianIm[0].getWidth());
+        for (int i = 1; i <= pyramidLevels; i++) {
             laplacianIm[i - 1]
                     .setInterpolationMethod(ImageProcessor.NEAREST_NEIGHBOR);
             laplacianIm[i] = gaussianIm[i - 1].resize(gaussianIm[i].getWidth(),
@@ -63,12 +67,12 @@ public class TextureTools {
             laplacianIm[i].copyBits(gaussianIm[i], 0, 0, Blitter.DIFFERENCE);
         }
 
-        // for (ImageProcessor imageProcessor : laplacianIm) {
-        // System.out.println("laplace: " + imageProcessor);
-        // }
+        for (ImageProcessor imageProcessor : laplacianIm) {
+            System.out.println("laplace: " + imageProcessor);
+        }
 
         // make integral images
-        for (int i = 1; i <= PYRAMID_LEVELS; i++) {
+        for (int i = 1; i <= pyramidLevels; i++) {
             int ii = (i - 1) * 3;
 
             ByteProcessor rr = (ByteProcessor) laplacianIm[i].toFloat(0, null)
@@ -81,6 +85,8 @@ public class TextureTools {
             result[ii] = new IntegralImage(rr);
             result[ii + 1] = new IntegralImage(gg);
             result[ii + 2] = new IntegralImage(bb);
+            System.out.println(rr);
+            System.out.println(result[ii]);
         }
 
         // display ?
@@ -102,6 +108,14 @@ public class TextureTools {
         return result;
     }
 
+    static boolean isPowerOfTwo(int n) {
+        if (n <= 0) {
+            return false;
+        } else {
+            return (n & (n - 1)) == 0;
+        }
+    }
+
     static double[] generateFeatures(IntegralImage imgs[]) {
         IntegralImage ii = imgs[imgs.length - 1];
         return generateFeatures(imgs, 0, 0, ii.getWidth(), ii.getHeight());
@@ -117,12 +131,21 @@ public class TextureTools {
             int yy = y >> scale;
             int ww = w >> scale;
             int hh = h >> scale;
+            try {
+                if (ww == 0 || hh == 0) {
+                    result[i] = 0;
+                } else {
+                    result[i] = imgs[i].getAverage(xx, yy, ww, hh);
+                }
+            } catch (RuntimeException e) {
+                System.out.println("(" + x + "," + y + "), (" + w + "x" + h
+                        + ")");
+                System.out.println(" scale: " + scale + ", (" + xx + "," + yy
+                        + "), (" + ww + "x" + hh + ")");
+                System.out.println(imgs[i]);
 
-            // System.out.println("(" + x + "," + y + "), (" + w + "x" + h +
-            // ")");
-            // System.out.println(" scale: " + scale + ", (" + xx + "," + yy
-            // + "), (" + ww + "x" + hh + ")");
-            result[i] = imgs[i].getAverage(xx, yy, ww, hh);
+                throw e;
+            }
         }
 
         return result;
@@ -132,46 +155,48 @@ public class TextureTools {
         ImageProcessor blurred = img.duplicate();
         blurred.convolve(GAUSSIAN_5X5, 5, 5);
         blurred.setInterpolationMethod(ImageProcessor.NEAREST_NEIGHBOR);
-        return blurred.resize(blurred.getWidth() / 2);
+        return blurred.resize(blurred.getWidth() / 2, blurred.getHeight() / 2);
     }
 
     static void findPairwiseMatches(IntegralImage[] imgs,
-            List<double[]> features, ImageProcessor output, int boxSize,
+            List<double[]> features, ImageProcessor output,
             double distanceThreshold) {
         int w = output.getWidth();
         int h = output.getHeight();
 
-        for (int y = 0; y < h - boxSize; y++) {
-            for (int x = 0; x < w - boxSize; x++) {
-                double minDistance = Double.MAX_VALUE;
-                double ff[] = generateFeatures(imgs, x, y, boxSize, boxSize);
-                for (double[] feature : features) {
+        for (double[] feature : features) {
+            int boxSize = 1 << ((feature.length / 3) + 1);
+            System.out.println("feature length: " + feature.length
+                    + ", boxSize: " + boxSize);
+            for (int y = 0; y < h - boxSize; y++) {
+                for (int x = 0; x < w - boxSize; x++) {
+                    double ff[] = generateFeatures(imgs, x, y, boxSize, boxSize);
                     double distance = 0.0;
+                    int vectorOffset = ff.length - feature.length;
                     for (int i = 0; i < feature.length; i++) {
-                        if (ff[i] > feature[i]) {
-                            distance += Math.abs(ff[i] - feature[i]) / ff[i];
+                        double us = ff[i + vectorOffset];
+                        double them = feature[i];
+                        if (us > them) {
+                            distance += Math.abs(us - them) / us;
                         } else {
-                            distance += Math.abs(ff[i] - feature[i])
-                                    / feature[i];
+                            distance += Math.abs(us - them) / them;
                         }
                     }
                     distance /= feature.length;
                     // System.out.println(Arrays.toString(ff));
                     // System.out.println(" " + Arrays.toString(feature));
                     // System.out.println(" " + distance);
-                    minDistance = Math.min(distance, minDistance);
-                }
-
-                // System.out.println("minDistance: " + minDistance);
-                if (false) {
-                    output.setRoi(x, y, boxSize, boxSize);
-                    float v = (float) minDistance;
-                    output.setColor(new Color(v, v, v));
-                    output.fill();
-                } else if (minDistance <= distanceThreshold) {
-                    // System.out.println("filling " + x + "," + y);
-                    output.setRoi(x, y, boxSize, boxSize);
-                    output.fill();
+                    if (distance <= distanceThreshold) {
+                        // System.out.println("filling " + x + "," + y);
+                        output.setRoi(x, y, boxSize, boxSize);
+                        output.fill();
+                    }
+                    if (false) {
+                        output.setRoi(x, y, boxSize, boxSize);
+                        float v = (float) distance;
+                        output.setColor(new Color(v, v, v));
+                        output.fill();
+                    }
                 }
             }
         }
