@@ -38,7 +38,7 @@ public class TextureTools {
         // floor(lg(w)) - 1
         int pyramidLevels = 30 - Integer.numberOfLeadingZeros(minDimension);
 
-        System.out.println("pyramid levels: " + pyramidLevels);
+        // System.out.println("pyramid levels: " + pyramidLevels);
 
         ImageProcessor[] gaussianIm = new ImageProcessor[pyramidLevels + 1];
         ImageProcessor[] laplacianIm = new ImageProcessor[pyramidLevels + 1];
@@ -51,9 +51,9 @@ public class TextureTools {
             gaussianIm[i] = createOnePyramidStepDown(gaussianIm[i + 1]);
         }
 
-        for (ImageProcessor imageProcessor : gaussianIm) {
-            System.out.println("gauss: " + imageProcessor);
-        }
+        // for (ImageProcessor imageProcessor : gaussianIm) {
+        // System.out.println("gauss: " + imageProcessor);
+        // }
 
         // make laplacian pyramid
         laplacianIm[0] = gaussianIm[0];
@@ -67,9 +67,9 @@ public class TextureTools {
             laplacianIm[i].copyBits(gaussianIm[i], 0, 0, Blitter.DIFFERENCE);
         }
 
-        for (ImageProcessor imageProcessor : laplacianIm) {
-            System.out.println("laplace: " + imageProcessor);
-        }
+        // for (ImageProcessor imageProcessor : laplacianIm) {
+        // System.out.println("laplace: " + imageProcessor);
+        // }
 
         // make integral images
         for (int i = 1; i <= pyramidLevels; i++) {
@@ -85,8 +85,8 @@ public class TextureTools {
             result[ii] = new IntegralImage(rr);
             result[ii + 1] = new IntegralImage(gg);
             result[ii + 2] = new IntegralImage(bb);
-            System.out.println(rr);
-            System.out.println(result[ii]);
+            // System.out.println(rr);
+            // System.out.println(result[ii]);
         }
 
         // display ?
@@ -166,8 +166,8 @@ public class TextureTools {
 
         for (double[] feature : features) {
             int boxSize = 1 << ((feature.length / 3) + 1);
-            System.out.println("feature length: " + feature.length
-                    + ", boxSize: " + boxSize);
+            // System.out.println("feature length: " + feature.length
+            // + ", boxSize: " + boxSize);
             for (int y = 0; y < h - boxSize; y++) {
                 for (int x = 0; x < w - boxSize; x++) {
                     double ff[] = generateFeatures(imgs, x, y, boxSize, boxSize);

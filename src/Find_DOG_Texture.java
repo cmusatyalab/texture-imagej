@@ -90,7 +90,7 @@ public class Find_DOG_Texture implements PlugInFilter {
 
             // lg(n) - 1, isPowerOfTwo(n)
             int expectedLength = (Integer.numberOfTrailingZeros(size) - 1) * 3;
-            System.out.println(expectedLength);
+            // System.out.println(expectedLength);
 
             if ((nums.length - 1) != expectedLength) {
                 IJ.error("Bad size of feature vector");
